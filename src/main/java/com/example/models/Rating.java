@@ -2,12 +2,18 @@ package com.example.models;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 @XmlRootElement
 public class Rating {
 
+	@JsonProperty("rating")
 	private final int rating;
+	@JsonProperty("locations")
 	private final String locations;
+	@JsonProperty("tags")
 	private final String[] tags;
+	@JsonProperty("people")
 	private final String[] people;
 
 	public Rating() {
@@ -32,10 +38,18 @@ public class Rating {
 		return locations;
 	}
 
+	public String[] getTags() {
+		return tags;
+	}
+	
 	public String getTags(int i) {
 		return tags[i];
 	}
 
+	public String[] getPeople() {
+		return people;
+	}
+	
 	public String getPerson(int i) {
 		return people[i];
 	}
