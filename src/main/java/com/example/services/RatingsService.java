@@ -18,6 +18,14 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class RatingsService {
 
+	@GET
+	/**
+	 * Just throwing in a generic get to see that things are working.
+	 */
+	public String get() {
+		return "Hello!";
+	}
+	
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public void put(Rating rating) {
