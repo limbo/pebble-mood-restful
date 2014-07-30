@@ -1,10 +1,12 @@
 package com.example;
 
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 
+@Provider
 public class MyObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
     final ObjectMapper defaultObjectMapper;
