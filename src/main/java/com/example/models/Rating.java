@@ -1,5 +1,7 @@
 package com.example.models;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -15,6 +17,8 @@ public class Rating {
 	private final String[] tags;
 	@JsonProperty("people")
 	private final String[] people;
+	@JsonProperty("time_created")
+	private final long time_created = new Date().getTime();
 
 	public Rating() {
 		rating = -1;
@@ -30,6 +34,10 @@ public class Rating {
     	this.people = new String[]{person1, person2, person3, person4};
     }
 
+    public long getTimeCreated() {
+    	return time_created;
+    }
+    
 	public int getRating() {
 		return rating;
 	}
@@ -43,7 +51,11 @@ public class Rating {
 	}
 	
 	public String getTags(int i) {
-		return tags[i];
+		if (tags.length > i) {
+			return tags[i];
+		} else {
+			return null;
+		}
 	}
 
 	public String[] getPeople() {
@@ -51,7 +63,11 @@ public class Rating {
 	}
 	
 	public String getPerson(int i) {
-		return people[i];
+		if (people.length > i) {
+			return people[i];
+		} else {
+			return null;
+		}
 	}
 
 }

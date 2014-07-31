@@ -1,20 +1,28 @@
 package com.example;
 
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import com.example.models.Rating;
+import com.example.services.RatingsService;
+import com.treasure_data.client.TreasureDataClient;
 
 public class MoodApplication extends Application {
-    @Override
+
+	public MoodApplication() {
+		super();
+
+	}
+	@Override
     public Set<Class<?>> getClasses() {
 
         final Set<Class<?>> classes = new HashSet<Class<?>>();
 
         // register root resources
-        classes.add(Rating.class);
+        classes.add(RatingsService.class);
 
         // register Jackson ObjectMapper resolver
         classes.add(MyObjectMapperProvider.class);

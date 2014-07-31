@@ -1,7 +1,11 @@
 package com.example;
 
+import java.util.Map;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import com.sun.jersey.api.core.PackagesResourceConfig;
 
 /**
  *
@@ -24,7 +28,7 @@ public class Main {
         if (webPort == null || webPort.isEmpty()) {
             webPort = "8080";
         }
-
+        
         Server server = new Server(Integer.valueOf(webPort));
         WebAppContext root = new WebAppContext();
 
