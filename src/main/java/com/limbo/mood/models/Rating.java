@@ -1,4 +1,4 @@
-package com.example.models;
+package com.limbo.mood.models;
 
 import java.util.Date;
 

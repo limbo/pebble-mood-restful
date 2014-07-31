@@ -1,4 +1,4 @@
-package com.example.services;
+package com.limbo.mood.services;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -19,8 +19,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.bson.types.ObjectId;
 
-import com.example.MongoHQHandler;
-import com.example.models.Rating;
+import com.limbo.mood.MongoHQHandler;
+import com.limbo.mood.models.Rating;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;

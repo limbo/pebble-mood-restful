@@ -1,4 +1,4 @@
-package com.example;
+package com.limbo.mood;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -7,7 +7,7 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import com.example.services.RatingsService;
+import com.limbo.mood.services.RatingsService;
 import com.treasure_data.client.TreasureDataClient;
 
 public class MoodApplication extends Application {

@@ -2,6 +2,8 @@ package com.example.models;
 
 import org.junit.Test;
 
+import com.limbo.mood.models.Rating;
+
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;

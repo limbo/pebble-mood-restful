@@ -1,4 +1,4 @@
-package com.example;
+package com.limbo.mood;
 
 import java.io.IOException;
 import java.net.URL;
