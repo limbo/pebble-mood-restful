@@ -18,7 +18,7 @@ public class Rating {
 	@JsonProperty("people")
 	private final String[] people;
 	@JsonProperty("time_created")
-	private final long time_created = new Date().getTime();
+	private final Date time_created = new Date();
 
 	public Rating() {
 		rating = -1;
@@ -34,7 +34,7 @@ public class Rating {
     	this.people = new String[]{person1, person2, person3, person4};
     }
 
-    public long getTimeCreated() {
+    public Date getTimeCreated() {
     	return time_created;
     }
     
