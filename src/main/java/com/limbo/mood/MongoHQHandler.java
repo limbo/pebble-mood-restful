@@ -9,9 +9,15 @@ import java.util.Properties;
 import org.eclipse.jetty.server.handler.ContextHandler;
 
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.MongoURI;
 
+/**
+ * Provides access to MongodbHQ service.
+ * @author limbo
+ *
+ */
 public class MongoHQHandler {
 
 	private static final DB db = initDB();
@@ -46,5 +52,9 @@ public class MongoHQHandler {
 	
 	public static DB getDB() {
 		return db;
+	}
+	
+	public static DBCollection getCollection(String name) {
+		return getDB().getCollection(name);
 	}
 }

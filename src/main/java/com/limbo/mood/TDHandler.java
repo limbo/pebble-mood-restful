@@ -8,6 +8,12 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 
 import com.treasure_data.client.TreasureDataClient;
 
+/**
+ * Test class to use Traeasure Data. No longer in use.
+ * TODO: remove this class and other references to TD.
+ * @author limbo
+ *
+ */
 public class TDHandler {
 
 	private static final TreasureDataClient tdClient = initTdClient();
