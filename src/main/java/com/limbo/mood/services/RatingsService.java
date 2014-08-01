@@ -36,15 +36,15 @@ public class RatingsService {
 	@GET
 	@Path("/{id}")
 	public Response get(@PathParam("id") String id) {
+		System.err.println("Get Rating");
 		Response r;
-		DB db = MongoHQHandler.getDB();
 		
 		System.err.println("GET RATING: " + id);
 		
 		DBObject q = QueryBuilder.start("_id").is(new ObjectId(id)).get();
 		System.err.println("QUERY: " + q.toString());
 		
-		DBObject obj = db.getCollection("mood-ratings").findOne(q);
+		DBObject obj = MongoHQHandler.getCollection("mood-ratings").findOne(q);
 		if (obj != null) {
 			obj.removeField("_id");
 			r = Response.ok(obj).build();
@@ -140,7 +140,7 @@ public class RatingsService {
 	
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response put(Rating rating) {
+    public Response post(Rating rating) {
 
     	DB db = MongoHQHandler.getDB();
 

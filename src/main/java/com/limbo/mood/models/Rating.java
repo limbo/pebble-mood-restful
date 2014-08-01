@@ -1,5 +1,8 @@
 package com.limbo.mood.models;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -13,6 +16,10 @@ public class Rating {
 	private final int rating;
 	@JsonProperty("locations")
 	private final String locations;
+	@JsonProperty("longitude")
+	private final long longitude;
+	@JsonProperty("lat")
+	private final long latitude;
 	@JsonProperty("tags")
 	private final String[] tags;
 	@JsonProperty("people")
@@ -25,13 +32,23 @@ public class Rating {
 		locations = new String();
 		tags = new String[0];
 		people = new String[0];
+		longitude = -1;
+		latitude = -1;
 	}
 	
-    public Rating(int rating, String locations, String tag1, String tag2, String tag3, String tag4, String tag5, String person1, String person2, String person3, String person4, String person5) {
+	private String[] collectElements(String e1, String e2, String e3, String e4, String e5) {
+    	ArrayList<String> t = new ArrayList<String>(Arrays.asList(new String[]{e1, e2, e3, e4, e5}));
+    	t.removeAll(Collections.singleton(null));
+    	return t.toArray(new String[t.size()]);
+	}
+	
+    public Rating(int rating, String locations, long longitude, long latitude, String tag1, String tag2, String tag3, String tag4, String tag5, String person1, String person2, String person3, String person4, String person5) {
     	this.rating = rating;
     	this.locations = locations;
-    	this.tags = new String[]{tag1, tag2, tag3, tag4};
-    	this.people = new String[]{person1, person2, person3, person4};
+    	this.tags = collectElements(tag1, tag2, tag3, tag4, tag5);
+    	this.people = collectElements(person1, person2, person3, person4, person5);
+    	this.longitude = longitude;
+    	this.latitude = latitude;
     }
 
     public Date getTimeCreated() {
@@ -70,4 +87,11 @@ public class Rating {
 		}
 	}
 
+	public long getLongitude() {
+		return longitude;
+	}
+
+	public long getLatitude() {
+		return latitude;
+	}
 }

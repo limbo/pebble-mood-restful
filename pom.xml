@@ -7,21 +7,40 @@
     <artifactId>jax-rs-heroku</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+       <jetty.version>9.2.0.M0</jetty.version>
     </properties>
+
+   <repositories>
+       <repository>
+           <id>repo2_maven_org</id>
+           <url>http://repo2.maven.org/maven2</url>
+       </repository>
+   </repositories>
+
     <dependencies>
         <!-- Jetty -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>7.6.0.v20120127</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
-            <version>7.6.0.v20120127</version>
-        </dependency>
+       <dependency>
+           <groupId>org.eclipse.jetty</groupId>
+           <artifactId>jetty-server</artifactId>
+           <version>${jetty.version}</version>
+       </dependency>
+ 		<dependency>
+       		<groupId>org.eclipse.jetty</groupId>
+       		<artifactId>jetty-servlet</artifactId>
+       		<version>${jetty.version}</version>
+   		</dependency>
+ 		<dependency>
+       		<groupId>org.eclipse.jetty</groupId>
+       		<artifactId>jetty-webapp</artifactId>
+       		<version>${jetty.version}</version>
+   		</dependency>
+ 		<dependency>
+       		<groupId>org.eclipse.jetty</groupId>
+       		<artifactId>jetty-util</artifactId>
+       		<version>${jetty.version}</version>
+   		</dependency>
 
-        <!-- Jersey -->
+           <!-- Jersey -->
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
@@ -37,10 +56,14 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
-        
+        <dependency>
+		  <groupId>com.restfuse</groupId>
+  		  <artifactId>com.eclipsesource.restfuse</artifactId>
+  		  <version>1.2.0</version>
+		</dependency>
         <!--  data stores -->
         <dependency>
         	<groupId>com.treasuredata</groupId>

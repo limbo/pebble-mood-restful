@@ -1,11 +1,7 @@
 package com.limbo.mood;
 
-import java.util.Map;
-
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
-
-import com.sun.jersey.api.core.PackagesResourceConfig;
 
 /**
  *

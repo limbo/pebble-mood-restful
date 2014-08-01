@@ -18,7 +18,7 @@ import com.mongodb.MongoURI;
  * @author limbo
  *
  */
-public class MongoHQHandler {
+public class MongoHQHandlerTest {
 
 	private static final DB db = initDB();
 	
@@ -26,7 +26,7 @@ public class MongoHQHandler {
 		DB db_ = null;
 		try {
 			Properties props = System.getProperties();
-			URL r = ContextHandler.getCurrentContext().getResource("/WEB-INF/mongohq.properties");
+			URL r = new URL("file:/Users/limbo/git/heroku/pebble-mood-restful/src/main/webapp/WEB-INF/mongohq.properties");
 	   		props.load(r.openStream());
 			MongoURI mongoURI = new MongoURI(props.getProperty("mongohq-url"));
 	   		System.err.println("MongoURI: " + mongoURI.toString());
@@ -55,13 +55,6 @@ public class MongoHQHandler {
 	}
 	
 	public static DBCollection getCollection(String name) {
-		String configured = (String)ContextHandler.getCurrentContext().getAttribute("collection");
-		if (configured != null) {
-			System.err.println(configured);
-			return getDB().getCollection(configured);
-		} else {
-			System.err.println(name);
-			return getDB().getCollection(name);
-		}
+		return getDB().getCollection(name);
 	}
 }
