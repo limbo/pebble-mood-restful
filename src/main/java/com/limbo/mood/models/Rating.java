@@ -11,6 +11,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 @XmlRootElement
 public class Rating {
+	public static final String collectionName = "mood-users";
 
 	@JsonProperty("rating")
 	private final int rating;
