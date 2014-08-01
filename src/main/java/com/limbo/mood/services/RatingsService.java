@@ -19,15 +19,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.bson.types.ObjectId;
-
 import com.limbo.mood.MongoHQHandler;
 import com.limbo.mood.models.Rating;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.mongodb.QueryBuilder;
 
 @Path("/rating")
 @Produces(MediaType.APPLICATION_JSON)
@@ -41,10 +38,7 @@ public class RatingsService {
 		
 		System.err.println("GET RATING: " + id);
 		
-		DBObject q = QueryBuilder.start("_id").is(new ObjectId(id)).get();
-		System.err.println("QUERY: " + q.toString());
-		
-		DBObject obj = MongoHQHandler.getCollection("mood-ratings").findOne(q);
+		DBObject obj = MongoHQHandler.findById("mood-ratings", id);
 		if (obj != null) {
 			obj.removeField("_id");
 			r = Response.ok(obj).build();

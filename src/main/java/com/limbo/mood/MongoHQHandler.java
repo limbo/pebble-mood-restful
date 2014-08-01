@@ -18,6 +18,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.MongoURI;
+import com.mongodb.QueryBuilder;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 
@@ -64,6 +65,7 @@ public class MongoHQHandler {
 
 		return db_;
 	}
+	
 	private static MongoClient initClient(MongoClientURI uri) {
 		MongoClient client = null;
 		
@@ -110,5 +112,17 @@ public class MongoHQHandler {
         	return null;
     	}
 		
+	}
+	
+	public static DBObject findById(String collectionName, String id) {
+		DBObject q = QueryBuilder.start("_id").is(new ObjectId(id)).get();
+		System.err.println("QUERY: " + q.toString());
+		
+		DBObject obj = getCollection(collectionName).findOne(q);
+		if (obj != null) {
+			return obj;
+		} else {
+			return null;
+		}
 	}
 }
