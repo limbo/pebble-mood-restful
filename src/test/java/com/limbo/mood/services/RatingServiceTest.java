@@ -1,18 +1,17 @@
 package com.limbo.mood.services;
 
+import static com.eclipsesource.restfuse.Assert.assertOk;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Date;
+
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.*;
-import static com.eclipsesource.restfuse.Assert.assertOk;
 
 import com.eclipsesource.restfuse.Destination;
 import com.eclipsesource.restfuse.HttpJUnitRunner;
@@ -23,18 +22,11 @@ import com.eclipsesource.restfuse.Response;
 import com.eclipsesource.restfuse.annotation.Context;
 import com.eclipsesource.restfuse.annotation.HttpTest;
 import com.limbo.mood.MongoHQHandlerTest;
-import com.limbo.mood.models.Rating;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
-
-import java.util.Date;
-import java.util.TimeZone;
-
-import junit.framework.TestCase;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(HttpJUnitRunner.class)
 public class RatingServiceTest {
@@ -153,6 +145,10 @@ public class RatingServiceTest {
     	assertOk(response);
     }
     
+    /**
+     * TODO: add closed cycle test POST -> GET
+     * @throws Exception
+     */
     @HttpTest(method=Method.POST, path = "/services/rating", type = MediaType.APPLICATION_JSON, content = "{\"rating\" : 6,  \"longitude\" : -122.2774162889666,  \"lat\" : 37.81409106220846,  \"locations\" : \"home\",  \"tags\" : [\"test1\", \"test2\"], \"people\" : [\"tester1\", \"tester2\"]}")
     public void testPost() throws Exception {
         assertEquals(201, response.getStatus());

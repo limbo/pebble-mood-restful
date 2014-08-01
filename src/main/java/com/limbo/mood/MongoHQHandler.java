@@ -6,14 +6,20 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
+import javax.ws.rs.core.Response;
+
+import org.bson.types.ObjectId;
 import org.eclipse.jetty.server.handler.ContextHandler;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.MongoURI;
+import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 
 /**
  * Provides access to MongodbHQ service.
@@ -87,5 +93,22 @@ public class MongoHQHandler {
 			System.err.println(name);
 			return getDB().getCollection(name);
 		}
+	}
+	
+	public static String insert(String collection, DBObject o, boolean withID) {
+    	try {
+    		o.put("_id", new ObjectId());
+    		WriteResult result = getCollection(collection).insert(o, WriteConcern.ACKNOWLEDGED);
+    		
+        	if (withID) {
+        		return o.get("_id").toString();
+        	} else {
+        		return null;
+        	}
+     	} catch (MongoException e) {
+        	System.err.println("RATING MONGO EX: " + e.getMessage());
+        	return null;
+    	}
+		
 	}
 }

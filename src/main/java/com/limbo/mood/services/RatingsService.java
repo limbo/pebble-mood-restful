@@ -1,5 +1,7 @@
 package com.limbo.mood.services;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,9 +13,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.bson.types.ObjectId;
 
@@ -22,8 +26,8 @@ import com.limbo.mood.models.Rating;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
-import com.mongodb.WriteResult;
 
 @Path("/rating")
 @Produces(MediaType.APPLICATION_JSON)
@@ -127,7 +131,7 @@ public class RatingsService {
 	
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response post(Rating rating) {
+    public Response post(@Context UriInfo uriInfo, Rating rating) {
 
     	DBObject newRating = new BasicDBObject();
     	newRating.put("time", rating.getTimeCreated());
@@ -143,13 +147,18 @@ public class RatingsService {
     	newRating.put("person4", rating.getPerson(3));
 
     	Response r;
-    	WriteResult result = MongoHQHandler.getCollection("mood-ratings").insert(newRating);
-    	if (result.getError() != null) {
-        	System.err.println("RATING POST ERR: " + result.getError());
+    	try {
+    		String id = MongoHQHandler.insert("mood-ratings", newRating, true);
+    		
+    		URI uri = new URI(uriInfo.getAbsolutePath().toString() + "/" + id);
+        	r = Response.created(uri).build();
+     	} catch (MongoException e) {
+        	System.err.println("RATING MONGO EX: " + e.getMessage());
         	r = Response.serverError().status(500).build();
-    	} else {
-    		r= Response.created(null).build();
-    	}
+    	} catch (URISyntaxException e) {
+        	System.err.println("RATING POST URI EX: " + e.getMessage());
+        	r = Response.serverError().status(500).build();
+		}
     	return r;
     }
 
