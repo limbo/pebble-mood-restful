@@ -5,8 +5,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javassist.expr.NewArray;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -23,8 +21,6 @@ import com.limbo.mood.MongoHQHandler;
 import com.limbo.mood.models.Rating;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import com.mongodb.WriteResult;
@@ -54,22 +50,13 @@ public class RatingsService {
 		
 		return r;
 	}
-	
-	private Date yearAgo(Date d) {
-		// Use the Calendar class to subtract one day
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(d);
-        calendar.add(Calendar.YEAR, -1);
-        return calendar.getTime();
-	}
-	
+		
 	@GET
 	@Path("/report/{period}")
 	public Response report(@PathParam("period") String period) {
 		Response r;
 		
 		System.err.println("Report: " + period);
-		DB db = MongoHQHandler.getDB();
 		
 		if (period.equalsIgnoreCase("day")) {
 			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
@@ -87,7 +74,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = db.getCollection("mood-ratings").aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection("mood-ratings").aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 			
@@ -107,7 +94,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = db.getCollection("mood-ratings").aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection("mood-ratings").aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 
@@ -127,7 +114,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = db.getCollection("mood-ratings").aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection("mood-ratings").aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 			
@@ -141,8 +128,6 @@ public class RatingsService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response post(Rating rating) {
-
-    	DB db = MongoHQHandler.getDB();
 
     	DBObject newRating = new BasicDBObject();
     	newRating.put("time", rating.getTimeCreated());
@@ -158,7 +143,7 @@ public class RatingsService {
     	newRating.put("person4", rating.getPerson(3));
 
     	Response r;
-    	WriteResult result = db.getCollection("mood-ratings").insert(newRating);
+    	WriteResult result = MongoHQHandler.getCollection("mood-ratings").insert(newRating);
     	if (result.getError() != null) {
         	System.err.println("RATING POST ERR: " + result.getError());
         	r = Response.serverError().status(500).build();
@@ -167,6 +152,15 @@ public class RatingsService {
     	}
     	return r;
     }
+
+    // Utility methods
+	private Date yearAgo(Date d) {
+		// Use the Calendar class to subtract one day
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(d);
+        calendar.add(Calendar.YEAR, -1);
+        return calendar.getTime();
+	}
 
 }
 

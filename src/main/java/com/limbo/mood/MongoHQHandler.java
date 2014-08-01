@@ -74,7 +74,7 @@ public class MongoHQHandler {
 		return client;
 	}
 	
-	public static DB getDB() {
+	private static DB getDB() {
 		return db;
 	}
 	
