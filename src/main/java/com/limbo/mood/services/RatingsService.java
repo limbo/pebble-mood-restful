@@ -13,18 +13,23 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.bson.types.ObjectId;
+
 import com.limbo.mood.MongoHQHandler;
 import com.limbo.mood.models.Rating;
+import com.limbo.mood.models.User;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.QueryBuilder;
 
 @Path("/rating")
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,11 +56,33 @@ public class RatingsService {
 		
 	@GET
 	@Path("/report/{period}")
-	public Response report(@PathParam("period") String period) {
+	public Response report(@PathParam("period") String period, @QueryParam("authtoken") String authToken) {
 		Response r;
 		
 		System.err.println("Report: " + period);
+		System.err.println("token: " + authToken);
 		
+		String currentUserId;
+		
+		// authentication
+		if (authToken == null || authToken.equals("")) {
+			r = Response.status(401).build();
+			return r;
+		} else {
+			DBObject q = QueryBuilder.start("token").is(authToken).get();
+			System.err.println("QUERY: " + q.toString());
+			
+			DBObject u = MongoHQHandler.getCollection(User.collectionName).findOne(q);
+			if (u == null) {
+				r = Response.status(401).build();
+				return r;
+			} else {
+				currentUserId = u.get("_id").toString();
+			}
+		}
+		System.err.println("CURRENT user: " + currentUserId);
+		
+		// build report
 		if (period.equalsIgnoreCase("day")) {
 			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
 			DBObject match = new BasicDBObject("$match", lastYear);

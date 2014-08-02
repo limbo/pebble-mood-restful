@@ -118,11 +118,6 @@ public class MongoHQHandler {
 		DBObject q = QueryBuilder.start("_id").is(new ObjectId(id)).get();
 		System.err.println("QUERY: " + q.toString());
 		
-		DBObject obj = getCollection(collectionName).findOne(q);
-		if (obj != null) {
-			return obj;
-		} else {
-			return null;
-		}
+		return getCollection(collectionName).findOne(q);
 	}
 }
