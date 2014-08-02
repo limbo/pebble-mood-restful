@@ -20,8 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.bson.types.ObjectId;
-
 import com.limbo.mood.MongoHQHandler;
 import com.limbo.mood.models.Rating;
 import com.limbo.mood.models.User;
@@ -62,27 +60,17 @@ public class RatingsService {
 		System.err.println("Report: " + period);
 		System.err.println("token: " + authToken);
 		
-		String currentUserId;
-		
-		// authentication
-		if (authToken == null || authToken.equals("")) {
+		// verify authentication and get user id
+		String currentUserId = authenticateToken(authToken);
+		if (currentUserId == null) {
 			r = Response.status(401).build();
 			return r;
-		} else {
-			DBObject q = QueryBuilder.start("authtoken").is(authToken).get();
-			System.err.println("QUERY: " + q.toString());
-			
-			DBObject u = MongoHQHandler.getCollection(User.getCollectionName()).findOne(q);
-			if (u == null) {
-				r = Response.status(401).build();
-				return r;
-			} else {
-				currentUserId = u.get("_id").toString();
-			}
 		}
 		System.err.println("CURRENT user: " + currentUserId);
 		
 		// build report
+		// TODO: find a library to make aggregation nicer.
+		// TODO: extract query handling into separate class.
 		if (period.equalsIgnoreCase("day")) {
 			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
 			DBObject match = new BasicDBObject("$match", lastYear);
@@ -149,11 +137,38 @@ public class RatingsService {
 		
 		return r;
 	}
+
+	private String authenticateToken(String authToken) {
+		if (authToken == null || authToken.equals("")) {
+			return null;
+		} else {
+			DBObject q = QueryBuilder.start("authtoken").is(authToken).get();
+			System.err.println("QUERY: " + q.toString());
+			
+			DBObject u = MongoHQHandler.getCollection(User.getCollectionName()).findOne(q);
+			if (u == null) {
+				return null;
+			} else {
+				return u.get("_id").toString();
+			}
+		}
+	}
 	
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response post(@Context UriInfo uriInfo, Rating rating) {
+    public Response post(@Context UriInfo uriInfo, Rating rating, @QueryParam("authtoken") String authToken) {
+    	Response r;
 
+		// verify authentication and get user id
+		String currentUserId = authenticateToken(authToken);
+		if (currentUserId == null) {
+			r = Response.status(401).build();
+			return r;
+		}
+		System.err.println("CURRENT user: " + currentUserId);
+
+		// build new DBObject
+		// TODO: check out objectbuilder in mongoDB lib
     	DBObject newRating = new BasicDBObject();
     	newRating.put("time", rating.getTimeCreated());
     	newRating.put("rating", rating.getRating());
@@ -166,8 +181,8 @@ public class RatingsService {
     	newRating.put("person2", rating.getPerson(1));
     	newRating.put("person3", rating.getPerson(2));
     	newRating.put("person4", rating.getPerson(3));
+    	newRating.put("owner_id", currentUserId);
 
-    	Response r;
     	try {
     		String id = MongoHQHandler.insert(Rating.getCollectionName(), newRating, true);
     		

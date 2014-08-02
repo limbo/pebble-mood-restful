@@ -4,7 +4,6 @@ import static com.eclipsesource.restfuse.Assert.assertOk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import org.eclipse.jetty.server.Server;
@@ -28,8 +27,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
 
+// TODO: extract generic test class with all setup code.
 @RunWith(HttpJUnitRunner.class)
 public class RatingServiceTest {
     
@@ -189,9 +188,18 @@ public class RatingServiceTest {
      * TODO: add closed cycle test POST -> GET
      * @throws Exception
      */
-    @HttpTest(method=Method.POST, path = "/services/rating", type = MediaType.APPLICATION_JSON, content = "{\"rating\" : 6,  \"longitude\" : -122.2774162889666,  \"lat\" : 37.81409106220846,  \"locations\" : \"home\",  \"tags\" : [\"test1\", \"test2\"], \"people\" : [\"tester1\", \"tester2\"]}")
+    @HttpTest(method=Method.POST, path = "/services/rating?authtoken={authtoken}", type = MediaType.APPLICATION_JSON, content = "{\"rating\" : 6,  \"longitude\" : -122.2774162889666,  \"lat\" : 37.81409106220846,  \"locations\" : \"home\",  \"tags\" : [\"test1\", \"test2\"], \"people\" : [\"tester1\", \"tester2\"]}")
     public void testPost() throws Exception {
         assertEquals(201, response.getStatus());
     }
 
+    @HttpTest(method=Method.POST, path = "/services/rating", type = MediaType.APPLICATION_JSON, content = "{\"rating\" : 6,  \"longitude\" : -122.2774162889666,  \"lat\" : 37.81409106220846,  \"locations\" : \"home\",  \"tags\" : [\"test1\", \"test2\"], \"people\" : [\"tester1\", \"tester2\"]}")
+    public void testPostUnauthorized() throws Exception {
+        assertEquals(401, response.getStatus());
+    }
+
+    @HttpTest(method=Method.POST, path = "/services/rating?authtoken=testAuthTokenValu", type = MediaType.APPLICATION_JSON, content = "{\"rating\" : 6,  \"longitude\" : -122.2774162889666,  \"lat\" : 37.81409106220846,  \"locations\" : \"home\",  \"tags\" : [\"test1\", \"test2\"], \"people\" : [\"tester1\", \"tester2\"]}")
+    public void testPostBadAuthToken() throws Exception {
+        assertEquals(401, response.getStatus());
+    }
 }
