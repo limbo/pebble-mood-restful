@@ -43,7 +43,7 @@ public class RatingsService {
 		
 		System.err.println("GET RATING: " + id);
 		
-		DBObject obj = MongoHQHandler.findById(Rating.collectionName, id);
+		DBObject obj = MongoHQHandler.findById(Rating.getCollectionName(), id);
 		if (obj != null) {
 			obj.removeField("_id");
 			r = Response.ok(obj).build();
@@ -69,10 +69,10 @@ public class RatingsService {
 			r = Response.status(401).build();
 			return r;
 		} else {
-			DBObject q = QueryBuilder.start("token").is(authToken).get();
+			DBObject q = QueryBuilder.start("authtoken").is(authToken).get();
 			System.err.println("QUERY: " + q.toString());
 			
-			DBObject u = MongoHQHandler.getCollection(User.collectionName).findOne(q);
+			DBObject u = MongoHQHandler.getCollection(User.getCollectionName()).findOne(q);
 			if (u == null) {
 				r = Response.status(401).build();
 				return r;
@@ -99,7 +99,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = MongoHQHandler.getCollection(Rating.collectionName).aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection(Rating.getCollectionName()).aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 			
@@ -119,7 +119,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = MongoHQHandler.getCollection(Rating.collectionName).aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection(Rating.getCollectionName()).aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 
@@ -139,7 +139,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = MongoHQHandler.getCollection(Rating.collectionName).aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection(Rating.getCollectionName()).aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 			
@@ -169,7 +169,7 @@ public class RatingsService {
 
     	Response r;
     	try {
-    		String id = MongoHQHandler.insert(Rating.collectionName, newRating, true);
+    		String id = MongoHQHandler.insert(Rating.getCollectionName(), newRating, true);
     		
     		URI uri = new URI(uriInfo.getAbsolutePath().toString() + "/" + id);
         	r = Response.created(uri).build();

@@ -41,7 +41,7 @@ public class UserService {
 		
 		DBObject q = QueryBuilder.start("email").is(email).get();
 		System.err.println("QUERY: " + q.toString());
-		DBObject obj = MongoHQHandler.getCollection(User.collectionName).findOne(q);
+		DBObject obj = MongoHQHandler.getCollection(User.getCollectionName()).findOne(q);
 		if (obj != null) {
 			obj.removeField("_id");
 			r = Response.ok(obj).build();
@@ -63,7 +63,7 @@ public class UserService {
 
     	Response r;
     	try {
-    		String id = MongoHQHandler.insert(User.collectionName, newUser, true);
+    		String id = MongoHQHandler.insert(User.getCollectionName(), newUser, true);
     		
     		URI uri = new URI(uriInfo.getAbsolutePath().toString() + "/" + id);
         	r = Response.created(uri).build();
@@ -89,12 +89,12 @@ public class UserService {
     	
     	DBObject q = QueryBuilder.start("email").is(user.getEmail()).and("password").is(crypted).get();
 		System.err.println("QUERY: " + q.toString());
-		DBObject obj = MongoHQHandler.getCollection(User.collectionName).findOne(q);
+		DBObject obj = MongoHQHandler.getCollection(User.getCollectionName()).findOne(q);
 		
 		if (obj != null) {
 			String token = userToken(obj.get("email").toString());
-			obj.put("token", token);
-			MongoHQHandler.getCollection(User.collectionName).save(obj);
+			obj.put("authtoken", token);
+			MongoHQHandler.getCollection(User.getCollectionName()).save(obj);
 			r = Response.ok("{\"authtoken\": \"" + token + "\"}").build();
 		} else {
 			r = Response.serverError().status(403).build();

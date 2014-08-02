@@ -4,10 +4,12 @@ import static com.eclipsesource.restfuse.Assert.assertOk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -31,14 +33,18 @@ import com.mongodb.WriteResult;
 @RunWith(HttpJUnitRunner.class)
 public class RatingServiceTest {
     
-	private static final String testCollectionName = "mood-rating-test";
+	public static final String testCollectionName = "mood-ratings-test";
+	public static final String testCollectionPostfix = "-test";
+
 	private static String testID = "moo";
+	private static String testAuthToken = "testAuthTokenValue";
+	private static Server server;
 	
 	private static void startService() throws Exception {
         String webappDirLocation = "src/main/webapp/";
         
         
-        Server server = new Server(8080);
+        server = new Server(8080);
         WebAppContext context = new WebAppContext();
 
         context.setContextPath("/");
@@ -48,7 +54,7 @@ public class RatingServiceTest {
         System.err.println("BASE: " + context.getResourceBase());
         context.setParentLoaderPriority(true);
 //        root.setClassLoader(this.getClass().getClassLoader());
-        context.setAttribute("collection", testCollectionName);
+        context.setAttribute("collection-postfix", testCollectionPostfix);
         
         server.setHandler(context);
 
@@ -78,12 +84,28 @@ public class RatingServiceTest {
 		if (db.getCollection(testCollectionName) != null) {
 			db.getCollection(testCollectionName).drop();
 		}
+		if (db.getCollection(UserServiceTest.testCollectionName) != null) {
+			db.getCollection(UserServiceTest.testCollectionName).drop();
+		}
 		
 		db.createCollection(testCollectionName, null);
+		db.createCollection(UserServiceTest.testCollectionName, null);
 		
+		createTestUserWithAuth();
     	testID = createTestRating();
+    	
     	assertNotNull(testID);
 
+	}
+
+	private static void stopServer() throws Exception {
+		server.stop();
+		server.join();
+	}
+	
+	@AfterClass
+	public static void destroy() throws Exception {
+		stopServer();
 	}
 	
 	private static String createTestRating() {
@@ -102,21 +124,29 @@ public class RatingServiceTest {
     	newRating.put("person3", "tester2");
     	newRating.put("person4", "tester3");
 
-    	WriteResult result = testCollection.insert(newRating);
+    	testCollection.insert(newRating);
     	return newRating.get("_id").toString();
 	}
 	
+	private static void createTestUserWithAuth() {
+    	DBCollection testCollection = MongoHQHandlerTest.getCollection(UserServiceTest.testCollectionName);
+
+    	DBObject newUser = new BasicDBObject();
+    	newUser.put("email", "tester@test.com");
+    	newUser.put("password", "NieQminDE4Ggcewn98nKl3Jhgq7Smn3dLlQ1MyLPswq7njpt8qwsIP4jQ2MR1nhWTQyNMFkwV19g4tPQSBhNeQ");
+    	newUser.put("authtoken", testAuthToken);
+
+    	testCollection.insert(newUser);
+	}
+
 	@Rule
 	public Destination destination = getDestination();
 	
 	private Destination getDestination() {
-//			setup();
-
-//			testID = "53da75b25a15815fbc000001";
-		System.err.println("DEST");
 	    Destination destination = new Destination( this,"http://127.0.0.1:8080/");
 	    RequestContext context = destination.getRequestContext();
 	    context.addPathSegment("id", testID);
+	    context.addPathSegment("authtoken", testAuthToken);
 	    return destination;
 	}
 	
@@ -131,16 +161,26 @@ public class RatingServiceTest {
     }
 	
     @HttpTest(method=Method.GET, path = "/services/rating/report/day")
+    public void testReportUnauthorized() throws Exception {
+    	assertEquals(401, response.getStatus());
+    }
+
+    @HttpTest(method=Method.GET, path = "/services/rating/report/day?authtoken=testAuthTokenValu")
+    public void testReportBadAuthToken() throws Exception {
+    	assertEquals(401, response.getStatus());
+    }
+
+	@HttpTest(method=Method.GET, path = "/services/rating/report/day?authtoken={authtoken}")
     public void testReportDay() throws Exception {
     	assertOk(response);
     }
 
-    @HttpTest(method=Method.GET, path = "/services/rating/report/week")
+    @HttpTest(method=Method.GET, path = "/services/rating/report/week?authtoken={authtoken}")
     public void testReportWeek() throws Exception {
     	assertOk(response);
     }
 
-    @HttpTest(method=Method.GET, path = "/services/rating/report/month")
+    @HttpTest(method=Method.GET, path = "/services/rating/report/month?authtoken={authtoken}")
     public void testReportMonth() throws Exception {
     	assertOk(response);
     }

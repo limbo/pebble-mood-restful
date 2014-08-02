@@ -32,7 +32,7 @@ public class RatingTest {
         assertEquals(null, rating.getPerson(3));
         assertEquals(null, rating.getPerson(4));
         assertEquals(1l, rating.getLongitude());
-        assertEquals(12, rating.getLatitude());
+        assertEquals(2l, rating.getLatitude());
     }
 
     @Test
@@ -50,5 +50,7 @@ public class RatingTest {
         assertEquals(null, rating.getPerson(2));
         assertEquals(null, rating.getPerson(3));
         assertEquals(null, rating.getPerson(4));
+        assertEquals(1l, rating.getLongitude());
+        assertEquals(2l, rating.getLatitude());
     }
 }

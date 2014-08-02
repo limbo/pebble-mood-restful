@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -29,14 +30,16 @@ import com.mongodb.WriteResult;
 @RunWith(HttpJUnitRunner.class)
 public class UserServiceTest {
     
-	private static final String testCollectionName = "mood-user-test";
+	public static final String testCollectionName = "mood-users-test";
+	public static final String testCollectionPostfix = "-test";
 	private static String testID = "moo";
+	private static Server server;
 	
 	private static void startService() throws Exception {
         String webappDirLocation = "src/main/webapp/";
         
         
-        Server server = new Server(8080);
+        server = new Server(8080);
         WebAppContext context = new WebAppContext();
 
         context.setContextPath("/");
@@ -46,7 +49,7 @@ public class UserServiceTest {
         System.err.println("BASE: " + context.getResourceBase());
         context.setParentLoaderPriority(true);
 //        root.setClassLoader(this.getClass().getClassLoader());
-        context.setAttribute("collection", testCollectionName);
+        context.setAttribute("collection-postfix", testCollectionPostfix);
         
         server.setHandler(context);
 
@@ -81,15 +84,24 @@ public class UserServiceTest {
 		
     	testID = createTestUser();
     	assertNotNull(testID);
+	}
 
+	private static void stopServer() throws Exception {
+		server.stop();
+		server.join();
 	}
 	
+	@AfterClass
+	public static void destroy() throws Exception {
+		stopServer();
+	}
+
 	private static String createTestUser() {
     	DBCollection testCollection = MongoHQHandlerTest.getCollection(testCollectionName);
 
     	DBObject newUser = new BasicDBObject();
     	newUser.put("email", "tester@test.com");
-    	newUser.put("password", "NieQminDE4Ggcewn98nKl3Jhgq7Smn3dLlQ1MyLPswq7njpt8qwsIP4jQ2MR1nhWTQyNMFkwV19g4tPQSBhNeQ==");
+    	newUser.put("password", "NieQminDE4Ggcewn98nKl3Jhgq7Smn3dLlQ1MyLPswq7njpt8qwsIP4jQ2MR1nhWTQyNMFkwV19g4tPQSBhNeQ");
 
     	WriteResult result = testCollection.insert(newUser);
     	return newUser.get("_id").toString();

@@ -8,10 +8,11 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.eclipse.jetty.server.handler.ContextHandler;
 
 @XmlRootElement
 public class Rating {
-	public static final String collectionName = "mood-users";
+	private static final String collectionName = "mood-ratings";
 
 	@JsonProperty("rating")
 	private final int rating;
@@ -95,4 +96,14 @@ public class Rating {
 	public long getLatitude() {
 		return latitude;
 	}
+	
+	public static String getCollectionName() {
+		String postfix = (String)ContextHandler.getCurrentContext().getAttribute("collection-postfix");
+		if (postfix != null) {
+			return collectionName.concat(postfix);
+		} else {
+			return collectionName;
+		}
+	}
+
 }
