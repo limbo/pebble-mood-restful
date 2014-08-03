@@ -17,7 +17,6 @@ import com.eclipsesource.restfuse.Response;
 import com.eclipsesource.restfuse.annotation.Context;
 import com.eclipsesource.restfuse.annotation.HttpTest;
 
-// TODO: extract generic test class with all setup code.
 @RunWith(HttpJUnitRunner.class)
 public class RatingServiceTest extends AbstractServiceTest {
 	@Context
