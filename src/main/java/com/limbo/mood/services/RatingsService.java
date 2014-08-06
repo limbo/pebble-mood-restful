@@ -1,11 +1,11 @@
-package com.example.services;
+package com.limbo.mood.services;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import javassist.expr.NewArray;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,21 +13,21 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
-import org.bson.types.ObjectId;
-
-import com.example.MongoHQHandler;
-import com.example.models.Rating;
+import com.limbo.mood.MongoHQHandler;
+import com.limbo.mood.models.Rating;
+import com.limbo.mood.models.User;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
-import com.mongodb.WriteResult;
 
 @Path("/rating")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,15 +36,12 @@ public class RatingsService {
 	@GET
 	@Path("/{id}")
 	public Response get(@PathParam("id") String id) {
+		System.err.println("Get Rating");
 		Response r;
-		DB db = MongoHQHandler.getDB();
 		
 		System.err.println("GET RATING: " + id);
 		
-		DBObject q = QueryBuilder.start("_id").is(new ObjectId(id)).get();
-		System.err.println("QUERY: " + q.toString());
-		
-		DBObject obj = db.getCollection("mood-ratings").findOne(q);
+		DBObject obj = MongoHQHandler.findById(Rating.getCollectionName(), id);
 		if (obj != null) {
 			obj.removeField("_id");
 			r = Response.ok(obj).build();
@@ -54,23 +51,26 @@ public class RatingsService {
 		
 		return r;
 	}
-	
-	private Date yearAgo(Date d) {
-		// Use the Calendar class to subtract one day
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(d);
-        calendar.add(Calendar.YEAR, -1);
-        return calendar.getTime();
-	}
-	
+		
 	@GET
 	@Path("/report/{period}")
-	public Response report(@PathParam("period") String period) {
+	public Response report(@PathParam("period") String period, @QueryParam("authtoken") String authToken) {
 		Response r;
 		
 		System.err.println("Report: " + period);
-		DB db = MongoHQHandler.getDB();
+		System.err.println("token: " + authToken);
 		
+		// verify authentication and get user id
+		String currentUserId = authenticateToken(authToken);
+		if (currentUserId == null) {
+			r = Response.status(401).build();
+			return r;
+		}
+		System.err.println("CURRENT user: " + currentUserId);
+		
+		// build report
+		// TODO: find a library to make aggregation nicer.
+		// TODO: extract query handling into separate class.
 		if (period.equalsIgnoreCase("day")) {
 			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
 			DBObject match = new BasicDBObject("$match", lastYear);
@@ -87,7 +87,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = db.getCollection("mood-ratings").aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection(Rating.getCollectionName()).aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 			
@@ -107,7 +107,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = db.getCollection("mood-ratings").aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection(Rating.getCollectionName()).aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 
@@ -127,7 +127,7 @@ public class RatingsService {
 			DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 			
 			List<DBObject> pipeline = Arrays.asList(match, group, sort);
-			AggregationOutput output = db.getCollection("mood-ratings").aggregate(pipeline);
+			AggregationOutput output = MongoHQHandler.getCollection(Rating.getCollectionName()).aggregate(pipeline);
 			
 			r = Response.ok(output.results()).build();
 			
@@ -137,13 +137,38 @@ public class RatingsService {
 		
 		return r;
 	}
+
+	private String authenticateToken(String authToken) {
+		if (authToken == null || authToken.equals("")) {
+			return null;
+		} else {
+			DBObject q = QueryBuilder.start("authtoken").is(authToken).get();
+			System.err.println("QUERY: " + q.toString());
+			
+			DBObject u = MongoHQHandler.getCollection(User.getCollectionName()).findOne(q);
+			if (u == null) {
+				return null;
+			} else {
+				return u.get("_id").toString();
+			}
+		}
+	}
 	
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response put(Rating rating) {
+    public Response post(@Context UriInfo uriInfo, Rating rating, @QueryParam("authtoken") String authToken) {
+    	Response r;
 
-    	DB db = MongoHQHandler.getDB();
+		// verify authentication and get user id
+		String currentUserId = authenticateToken(authToken);
+		if (currentUserId == null) {
+			r = Response.status(401).build();
+			return r;
+		}
+		System.err.println("CURRENT user: " + currentUserId);
 
+		// build new DBObject
+		// TODO: check out objectbuilder in mongoDB lib
     	DBObject newRating = new BasicDBObject();
     	newRating.put("time", rating.getTimeCreated());
     	newRating.put("rating", rating.getRating());
@@ -156,17 +181,31 @@ public class RatingsService {
     	newRating.put("person2", rating.getPerson(1));
     	newRating.put("person3", rating.getPerson(2));
     	newRating.put("person4", rating.getPerson(3));
+    	newRating.put("owner_id", currentUserId);
 
-    	Response r;
-    	WriteResult result = db.getCollection("mood-ratings").insert(newRating);
-    	if (result.getError() != null) {
-        	System.err.println("RATING POST ERR: " + result.getError());
+    	try {
+    		String id = MongoHQHandler.insert(Rating.getCollectionName(), newRating, true);
+    		
+    		URI uri = new URI(uriInfo.getAbsolutePath().toString() + "/" + id);
+        	r = Response.created(uri).build();
+     	} catch (MongoException e) {
+        	System.err.println("RATING MONGO EX: " + e.getMessage());
         	r = Response.serverError().status(500).build();
-    	} else {
-    		r= Response.created(null).build();
-    	}
+    	} catch (URISyntaxException e) {
+        	System.err.println("RATING POST URI EX: " + e.getMessage());
+        	r = Response.serverError().status(500).build();
+		}
     	return r;
     }
+
+    // Utility methods
+	private Date yearAgo(Date d) {
+		// Use the Calendar class to subtract one day
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(d);
+        calendar.add(Calendar.YEAR, -1);
+        return calendar.getTime();
+	}
 
 }
 

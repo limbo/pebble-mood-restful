@@ -1,11 +1,7 @@
-package com.example;
-
-import java.util.Map;
+package com.limbo.mood;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
-
-import com.sun.jersey.api.core.PackagesResourceConfig;
 
 /**
  *
@@ -31,7 +27,6 @@ public class Main {
         
         Server server = new Server(Integer.valueOf(webPort));
         WebAppContext root = new WebAppContext();
-
         root.setContextPath("/");
         root.setDescriptor(webappDirLocation + "/WEB-INF/web.xml");
         root.setResourceBase(webappDirLocation);

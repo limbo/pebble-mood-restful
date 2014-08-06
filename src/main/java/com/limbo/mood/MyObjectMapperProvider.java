@@ -1,4 +1,4 @@
-package com.example;
+package com.limbo.mood;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;

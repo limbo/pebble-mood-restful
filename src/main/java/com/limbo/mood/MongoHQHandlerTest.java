@@ -1,4 +1,4 @@
-package com.example;
+package com.limbo.mood;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -9,10 +9,16 @@ import java.util.Properties;
 import org.eclipse.jetty.server.handler.ContextHandler;
 
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.MongoURI;
 
-public class MongoHQHandler {
+/**
+ * Provides access to MongodbHQ service.
+ * @author limbo
+ *
+ */
+public class MongoHQHandlerTest {
 
 	private static final DB db = initDB();
 	
@@ -20,7 +26,7 @@ public class MongoHQHandler {
 		DB db_ = null;
 		try {
 			Properties props = System.getProperties();
-			URL r = ContextHandler.getCurrentContext().getResource("/WEB-INF/mongohq.properties");
+			URL r = new URL("file:/Users/limbo/git/heroku/pebble-mood-restful/src/main/webapp/WEB-INF/mongohq.properties");
 	   		props.load(r.openStream());
 			MongoURI mongoURI = new MongoURI(props.getProperty("mongohq-url"));
 	   		System.err.println("MongoURI: " + mongoURI.toString());
@@ -46,5 +52,9 @@ public class MongoHQHandler {
 	
 	public static DB getDB() {
 		return db;
+	}
+	
+	public static DBCollection getCollection(String name) {
+		return getDB().getCollection(name);
 	}
 }
