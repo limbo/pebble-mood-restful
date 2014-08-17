@@ -2,6 +2,7 @@ package com.limbo.mood.services;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -72,8 +73,13 @@ public class RatingsService {
 		// TODO: find a library to make aggregation nicer.
 		// TODO: extract query handling into separate class.
 		if (period.equalsIgnoreCase("day")) {
+			DBObject owner = new BasicDBObject("owner_id", currentUserId);
 			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
-			DBObject match = new BasicDBObject("$match", lastYear);
+			ArrayList<DBObject> clauses = new ArrayList<DBObject>();
+			clauses.add(owner);
+			clauses.add(lastYear);
+			DBObject match = new BasicDBObject("$match", new BasicDBObject("$and", clauses));
+
 			DBObject date = new BasicDBObject("year", new BasicDBObject("$year", "$time"));
 			date.put("month", new BasicDBObject("$month", "$time"));
 			date.put("day", new BasicDBObject("$dayOfMonth", "$time"));
