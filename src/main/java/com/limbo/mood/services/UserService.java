@@ -16,6 +16,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.codec.binary.Base64;
@@ -24,6 +25,7 @@ import com.limbo.mood.MongoHQHandler;
 import com.limbo.mood.models.User;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 
@@ -67,6 +69,9 @@ public class UserService {
     		
     		URI uri = new URI(uriInfo.getAbsolutePath().toString() + "/" + id);
         	r = Response.created(uri).build();
+    	} catch (DuplicateKeyException dupe) {
+    		System.err.println("Duplicate user key: " + dupe.getMessage());
+    		r = Response.status(Status.CONFLICT).entity(user).build();
      	} catch (MongoException e) {
         	System.err.println("User MONGO EX: " + e.getMessage());
         	r = Response.serverError().status(500).build();
