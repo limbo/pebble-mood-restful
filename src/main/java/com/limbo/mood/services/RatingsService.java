@@ -72,14 +72,13 @@ public class RatingsService {
 		// build report
 		// TODO: find a library to make aggregation nicer.
 		// TODO: extract query handling into separate class.
+		DBObject owner = new BasicDBObject("owner_id", currentUserId);
+		DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
+		ArrayList<DBObject> clauses = new ArrayList<DBObject>();
+		clauses.add(owner);
+		clauses.add(lastYear);
+		DBObject match = new BasicDBObject("$match", new BasicDBObject("$and", clauses));
 		if (period.equalsIgnoreCase("day")) {
-			DBObject owner = new BasicDBObject("owner_id", currentUserId);
-			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
-			ArrayList<DBObject> clauses = new ArrayList<DBObject>();
-			clauses.add(owner);
-			clauses.add(lastYear);
-			DBObject match = new BasicDBObject("$match", new BasicDBObject("$and", clauses));
-
 			DBObject date = new BasicDBObject("year", new BasicDBObject("$year", "$time"));
 			date.put("month", new BasicDBObject("$month", "$time"));
 			date.put("day", new BasicDBObject("$dayOfMonth", "$time"));
@@ -99,8 +98,6 @@ public class RatingsService {
 			
 		} else if (period.equalsIgnoreCase("week")) {
 			r = Response.ok("week").build();
-			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
-			DBObject match = new BasicDBObject("$match", lastYear);
 			DBObject week = new BasicDBObject("year", new BasicDBObject("$year", "$time"));
 			week.put("week", new BasicDBObject("$week", "$time"));
 			DBObject groupFields = new BasicDBObject("_id", week);
@@ -119,8 +116,6 @@ public class RatingsService {
 
 			
 		} else if (period.equalsIgnoreCase("month")) {
-			DBObject lastYear = new BasicDBObject("time", new BasicDBObject("$gt", yearAgo(new Date())));
-			DBObject match = new BasicDBObject("$match", lastYear);
 			DBObject month = new BasicDBObject("year", new BasicDBObject("$year", "$time"));
 			month.put("month", new BasicDBObject("$month", "$time"));
 			DBObject groupFields = new BasicDBObject("_id", month);
