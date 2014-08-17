@@ -97,21 +97,15 @@ public class MongoHQHandler {
 		}
 	}
 	
-	public static String insert(String collection, DBObject o, boolean withID) {
-    	try {
-    		o.put("_id", new ObjectId());
-    		WriteResult result = getCollection(collection).insert(o, WriteConcern.ACKNOWLEDGED);
-    		
-        	if (withID) {
-        		return o.get("_id").toString();
-        	} else {
-        		return null;
-        	}
-     	} catch (MongoException e) {
-        	System.err.println("RATING MONGO EX: " + e.getMessage());
-        	return null;
-    	}
+	public static String insert(String collection, DBObject o, boolean withID) throws MongoException {
+		o.put("_id", new ObjectId());
+		WriteResult result = getCollection(collection).insert(o, WriteConcern.ACKNOWLEDGED);
 		
+    	if (withID) {
+    		return o.get("_id").toString();
+    	} else {
+    		return null;
+    	}
 	}
 	
 	public static DBObject findById(String collectionName, String id) {
